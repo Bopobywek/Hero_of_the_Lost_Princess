@@ -1,5 +1,6 @@
 import os
 from random import choice
+from time import sleep
 
 import pygame
 import pyganim
@@ -11,6 +12,7 @@ from sounds import Sounds
 from button import Button
 from background import Background
 from boss import Troll
+from settings import Settings
 
 
 pygame.init()
@@ -29,9 +31,11 @@ princess_sprite = pygame.sprite.Group()
 info_sprites = pygame.sprite.Group()
 buttons = pygame.sprite.Group()
 bg = pygame.sprite.Group()
-new_game_btn = Button(buttons, "new_game_btn.png", "new_game_btn_2.png", 300, 127, "bookFlip2.ogg")
-settings = Button(buttons, "settings_btn_2.png", "settings_btn.png", 300, 166, "bookFlip2.ogg")
-draw_level("1", 46, 46, [platform_sprites, all_sprites, hero_sprite, princess_sprite, info_sprites, boss_sprite])
+level_names = ["intro", "1", "2", "final"]
+level_name = "intro"
+new_game_btn = Button(buttons, "new_game_btn.png", "new_game_btn_2.png", 300, 127, "bookFlip2.ogg", "new_game")
+settings = Button(buttons, "settings_btn_2.png", "settings_btn.png", 300, 166, "bookFlip2.ogg", "settings")
+draw_level("intro", 46, 46, [platform_sprites, all_sprites, hero_sprite, princess_sprite, info_sprites, boss_sprite])
 hero = Hero(hero_sprite, 60, 60, Sounds().return_dict_of_sounds())
 hero.add(all_sprites)
 cursor_group = pygame.sprite.Group()
@@ -39,6 +43,8 @@ cursor = pygame.sprite.Sprite()
 cursor.image = pygame.image.load("data/cursor.png")
 cursor.rect = cursor.image.get_rect()
 cursor.add(cursor_group)
+settings_menu = Settings(screen)
+settings_status = False
 Background(bg)
 main_menu = True
 pygame.mouse.set_visible(False)
@@ -46,7 +52,6 @@ clock = pygame.time.Clock()
 fps = 40
 left_state, up_state, attack = None, None, None
 running = True
-print([sprite for sprite in all_sprites])
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -61,10 +66,15 @@ while running:
             buttons.update(event)
             for sprite in buttons:
                 if sprite.state():
-                    main_menu = False
-                    menu_music.stop()
-                    back_m.play(-1)
-                    break
+                    if sprite.button_name == "new_game":
+                        main_menu = False
+                        menu_music.stop()
+                        back_m.play(-1)
+                        break
+                    else:
+                        main_menu = False
+                        settings_status = True
+                        break
             if event.type == pygame.KEYDOWN:
                 if event.key == 32:
                     main_menu = False
@@ -72,6 +82,19 @@ while running:
                     back_m.play(-1)
             if event.type == pygame.MOUSEMOTION:
                 cursor.rect.x, cursor.rect.y = event.pos
+    elif settings_status:
+        settings_menu.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEMOTION:
+                cursor.rect.x, cursor.rect.y = event.pos
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                settings_menu.clicked(event.pos)
+        if not settings_menu.running:
+            settings_status = False
+            main_menu = True
+        cursor_group.draw(screen)
     else:
         bg.draw(screen)
         if pygame.key.get_pressed()[pygame.K_SPACE]:
@@ -81,16 +104,20 @@ while running:
         if pygame.key.get_pressed()[pygame.K_d]:
             left_state = 1
         if pygame.key.get_pressed()[pygame.K_TAB]:
-            pass
+            level_name = "2"
         if pygame.key.get_pressed()[pygame.K_r]:
             for el in platform_sprites:
                 all_sprites.remove(el)
                 platform_sprites.remove(el)
             for el in info_sprites:
                 info_sprites.remove(el)
+                all_sprites.remove(el)
             for sprite in princess_sprite:
                 sprite.reload()
-            hero.reload([platform_sprites, all_sprites, hero_sprite, princess_sprite, info_sprites, boss_sprite])
+            for sprite in boss_sprite:
+                sprite.reload()
+            hero.reload([platform_sprites, all_sprites, hero_sprite,
+                         princess_sprite, info_sprites, boss_sprite], level_name)
         if pygame.key.get_pressed()[pygame.K_f]:
             attack = True
         all_sprites.draw(screen)

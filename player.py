@@ -47,13 +47,9 @@ class Hero(pygame.sprite.Sprite):
         super().__init__(group)
         self.sounds = sounds
         self.speed_x, self.speed_y = 0, 0
-        self.rect = pygame.Rect(x, y, 55, 85)
+        self.rect = pygame.Rect(x, y, 50, 85)
         self.image = pygame.Surface((55, 85), pygame.SRCALPHA, 32)
         self.health = 100
-        self.health_image = pygame.Surface((self.health, 20))
-        self.health_image.fill(pygame.Color("red"))
-        self.health_rect = self.health_image.get_rect()
-        self.health_rect.x, self.health_rect.y = 5, 0
         self.start_pos = (x, y)
         self.ground = False
         self.time_hurt = time()
@@ -73,19 +69,24 @@ class Hero(pygame.sprite.Sprite):
         self.attack_anim_2.play()
         self.sounds["walk"].set_volume(0.3)
         self.sounds["jump"].set_volume(1.0)
+        self.sounds_timeout = {i: time() for i in sounds}
         self.rect.x, self.rect.y = x, y
         self.last_turn = None
         self.attack = False
 
     def collide_boss(self, group):
+        self.rect.width += 20
         for sprite in group:
             if pygame.sprite.collide_rect(sprite, self) and isinstance(sprite, Troll):
+                if self.attack:
+                    sprite.damage()
                 if self.time_hurt is not None:
-                    if round(time()) - round(self.time_hurt) > HURT_TIMEOUT:
-                        self.health -= 50
+                    if round(time()) - round(self.time_hurt) > HURT_TIMEOUT and sprite.attack:
+                        self.health -= 13
                         self.time_hurt = time()
                 else:
                     self.time_hurt = time()
+        self.rect.width -= 20
 
     def health_check(self):
         if self.health <= 0:
@@ -113,14 +114,17 @@ class Hero(pygame.sprite.Sprite):
                 if isinstance(sprite, DestroyPlatform) and self.attack:
                     sprite.kill()
 
-    def draw_health(self, surface):
-        surface.blit(self.health_image, (0, 5))
+    def draw_health(self, surface, hp):
+        pygame.draw.rect(surface, pygame.Color("red"), (0, 5, hp, 20))
         self.draw_text(surface, "Health {}%".format(round(self.health)))
 
     def update(self, group_collide, surface, left=None, up=None, attack=None):
-        self.health_rect.width = self.health
-        self.draw_health(surface)
+        self.draw_health(surface, self.health)
         self.attack = attack
+        if attack:
+            if time() - self.sounds_timeout["hit"] >= 0.3:
+                self.sounds["hit"].play()
+                self.sounds_timeout["hit"] = time()
         if attack is not None and up is None and left is None and self.ground:
             self.rect.width += 10
             for sprite in group_collide[0]:
@@ -131,19 +135,19 @@ class Hero(pygame.sprite.Sprite):
             if self.last_turn == "left":
                 self.attack_anim.blit(surface, (self.rect.x - 20, self.rect.y))
             else:
-                self.attack_anim_2.blit(surface, (self.rect.x, self.rect.y))
+                self.attack_anim_2.blit(surface, (self.rect.x - 5, self.rect.y))
         if left is not None:
             self.sounds["walk"].stop()
             self.speed_x = left * SPEED
             if self.ground:
                 self.sounds["walk"].play()
                 if left > 0:
-                    self.right_anim.blit(surface, (self.rect.x, self.rect.y))
+                    self.right_anim.blit(surface, (self.rect.x - 5, self.rect.y))
                 else:
                     self.left_anim.blit(surface, (self.rect.x - 20, self.rect.y))
             else:
                 if left > 0:
-                    self.jump_anim.blit(surface, (self.rect.x, self.rect.y))
+                    self.jump_anim.blit(surface, (self.rect.x - 5, self.rect.y))
                 else:
                     self.jump_left.blit(surface, (self.rect.x - 20, self.rect.y))
             if left > 0:
@@ -164,14 +168,14 @@ class Hero(pygame.sprite.Sprite):
         if left is None and up is None and self.ground and not attack:
             self.sounds["jump"].stop()
             self.sounds["walk"].stop()
-            self.stay_anim.blit(surface, (self.rect.x, self.rect.y))
+            self.stay_anim.blit(surface, (self.rect.x - 5, self.rect.y))
         if not self.ground:
             if self.speed_x > 0:
-                self.jump_anim.blit(surface, (self.rect.x, self.rect.y))
+                self.jump_anim.blit(surface, (self.rect.x - 5, self.rect.y))
             elif self.speed_x < 0:
                 self.jump_left.blit(surface, (self.rect.x - 20, self.rect.y))
             else:
-                self.jump_anim.blit(surface, (self.rect.x, self.rect.y))
+                self.jump_anim.blit(surface, (self.rect.x - 5, self.rect.y))
 
         self.rect.y += self.speed_y
         self.collision_y(group_collide[0])
@@ -181,14 +185,13 @@ class Hero(pygame.sprite.Sprite):
         self.collide_boss(group_collide[1])
         self.health_check()
 
-    def reload(self, all_sp):
-        draw_level("1", 46, 46, all_sp)
+    def reload(self, all_sp, name_level):
+        draw_level(name_level, 46, 46, all_sp)
         self.rect.x, self.rect.y = self.start_pos[0], self.start_pos[1]
         self.speed_x, self.speed_y = 0, 0
 
     def draw_text(self, surface, text):
         font = pygame.font.Font("CloisterBlack.ttf", 19)
         text = font.render(text, 1, pygame.Color("white"))
-        text_x = 0
-        text_y = 2
+        text_x, text_y = 0, 2
         surface.blit(text, (text_x, text_y))

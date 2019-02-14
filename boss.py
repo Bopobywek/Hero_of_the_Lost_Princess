@@ -1,21 +1,30 @@
 import os
+from time import time, sleep
 
 import pygame
 import pyganim
 
+from sounds import Sounds
+
+pygame.mixer.init()
+
 ANIMATION_RIGHT = [(pygame.transform.scale(pygame.image.load(os.path.join("data/Troll2/walk", i)), (300, 320)),
-                    100)
-                   for i in os.listdir("data/Troll2/walk")]
+                    150)
+                   for i in os.listdir("data/Troll2/walk")] + [(pygame.transform.scale(
+    pygame.image.load(os.path.join("data/Troll2/walk", i)), (300, 320)), 150)
+                                                                    for i in os.listdir("data/Troll2/walk")][:-1:-1]
 
 ANIMATION_LEFT = [(pygame.transform.flip(pygame.transform.scale(pygame.image.load(
-    os.path.join("data/Troll2/walk", i)), (300, 320)), True, False), 100)
+    os.path.join("data/Troll2/walk", i)), (300, 320)), True, False), 150)
                      for i in os.listdir("data/Troll2/walk")] + [(pygame.transform.flip(pygame.transform.scale(
-    pygame.image.load(os.path.join("data/Troll2/walk", i)), (300, 320)), True, False), 100)
-                                                                    for i in os.listdir("data/Troll2/walk")][:-2:-1]
+    pygame.image.load(os.path.join("data/Troll2/walk", i)), (300, 320)), True, False), 150)
+                                                                    for i in os.listdir("data/Troll2/walk")][:-1:-1]
 
 ANIMATION_STAY = [
-    (pygame.transform.scale(pygame.image.load(os.path.join("data/Troll2/idle", i)), (300, 300)), 150)
-    for i in os.listdir("data/Troll2/idle")]
+    (pygame.transform.scale(pygame.image.load(os.path.join("data/Troll2/idle", i)), (300, 300)), 200)
+    for i in os.listdir("data/Troll2/idle")] + [(pygame.transform.scale(
+    pygame.image.load(os.path.join("data/Troll2/idle", i)), (300, 320)), 200)
+                                                                    for i in os.listdir("data/Troll2/idle")][:-1:-1]
 
 GRAVITY = 0.5
 SPEED = 5
@@ -25,8 +34,9 @@ class Troll(pygame.sprite.Sprite):
 
     def __init__(self, group, x, y):
         super().__init__(group)
-        self.rect = pygame.Rect(x, y, 170, 290)
-        self.image = pygame.Surface((170, 290), pygame.SRCALPHA, 32)
+        self.attack = False
+        self.rect = pygame.Rect(x, y, 100, 200)
+        self.image = pygame.Surface((100, 200), pygame.SRCALPHA, 32)
         self.rect.x, self.rect.y = x, y
         self.speed_y = 0
         self.speed_x = 0
@@ -34,6 +44,9 @@ class Troll(pygame.sprite.Sprite):
         self.stay_anim.play()
         self.right_anim = pyganim.PygAnimation(ANIMATION_RIGHT)
         self.right_anim.play()
+        self.sounds = Sounds().return_dict_of_sounds()
+        self.health = 500
+        self.last_hurt = time()
         self.left_anim = pyganim.PygAnimation(ANIMATION_LEFT)
         self.left_anim.play()
         self.ground = False
@@ -49,14 +62,28 @@ class Troll(pygame.sprite.Sprite):
             else:
                 self.ground = False
 
+    def draw_hp(self, surface, hp):
+        pygame.draw.rect(surface, pygame.Color("red"), (150, 50, hp, 20))
+        self.draw_text(surface, "Troll health {}%".format(round(self.health)))
+
+    def damage(self):
+        if round(time()) - round(self.last_hurt) >= 3:
+            self.sounds["hurtT"].stop()
+            self.sounds["hurtT"].play()
+            self.health -= 50
+            self.last_hurt = time()
+
     def update(self, collide_group, surface):
-        if self.rect.colliderect((0, 0, 1920, 640)) == 1:
+        if self.rect.colliderect((0, 0, 900, 640)) == 1 and self.alive():
+            self.draw_hp(surface, self.health)
+            if self.health <= 0:
+                self.kill()
             if self.speed_x > 0:
-                self.right_anim.blit(surface, (self.rect.x, self.rect.y))
+                self.right_anim.blit(surface, (self.rect.x - 40, self.rect.y - 90))
             elif self.speed_x < 0:
-                self.left_anim.blit(surface, (self.rect.x, self.rect.y))
+                self.left_anim.blit(surface, (self.rect.x - 40, self.rect.y - 90))
             else:
-                self.stay_anim.blit(surface, (self.rect.x, self.rect.y))
+                self.stay_anim.blit(surface, (self.rect.x - 40, self.rect.y - 90))
 
             self.speed_x = -SPEED
 
@@ -75,3 +102,9 @@ class Troll(pygame.sprite.Sprite):
 
     def reload(self):
         self.kill()
+
+    def draw_text(self, surface, text):
+        font = pygame.font.Font("CloisterBlack.ttf", 19)
+        text = font.render(text, 1, pygame.Color("white"))
+        text_x, text_y = 250 + 150, 50
+        surface.blit(text, (text_x, text_y))
