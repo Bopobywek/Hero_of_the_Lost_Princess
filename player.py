@@ -52,6 +52,7 @@ class Hero(pygame.sprite.Sprite):
         self.health = 100
         self.start_pos = (x, y)
         self.ground = False
+        self.dead = False
         self.time_hurt = time()
         self.right_anim = pyganim.PygAnimation(ANIMATION_RIGHT)
         self.right_anim.play()
@@ -74,24 +75,26 @@ class Hero(pygame.sprite.Sprite):
         self.last_turn = None
         self.attack = False
 
+    def damage(self, hp):
+        if self.time_hurt is not None:
+            if round(time()) - round(self.time_hurt) > HURT_TIMEOUT:
+                self.health -= hp
+                self.time_hurt = time()
+        else:
+            self.time_hurt = time()
+
     def collide_boss(self, group):
         self.rect.width += 20
         for sprite in group:
             if pygame.sprite.collide_rect(sprite, self) and isinstance(sprite, Troll):
                 if self.attack:
                     sprite.damage()
-                if self.time_hurt is not None:
-                    if round(time()) - round(self.time_hurt) > HURT_TIMEOUT and sprite.attack:
-                        self.health -= 13
-                        self.time_hurt = time()
-                else:
-                    self.time_hurt = time()
+
         self.rect.width -= 20
 
     def health_check(self):
         if self.health <= 0:
-            self.kill()
-            raise SystemExit
+            self.dead = True
 
     def collision_y(self, sprites_group):
         for sprite in sprites_group:
@@ -184,11 +187,21 @@ class Hero(pygame.sprite.Sprite):
         self.collision_x(group_collide[0])
         self.collide_boss(group_collide[1])
         self.health_check()
+        if self.health < 75:
+            self.health += 0.005
 
-    def reload(self, all_sp, name_level):
+    def reload(self):
+        self.rect.x, self.rect.y = self.start_pos[0], self.start_pos[1]
+        self.speed_x, self.speed_y = 0, 0
+        self.dead = False
+        self.health = 100
+
+    def reload_level(self, all_sp, name_level):
         draw_level(name_level, 46, 46, all_sp)
         self.rect.x, self.rect.y = self.start_pos[0], self.start_pos[1]
         self.speed_x, self.speed_y = 0, 0
+        self.dead = False
+        self.health = 100
 
     def draw_text(self, surface, text):
         font = pygame.font.Font("CloisterBlack.ttf", 19)
