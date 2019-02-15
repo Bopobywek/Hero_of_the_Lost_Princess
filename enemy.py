@@ -93,7 +93,6 @@ class Enemy(pygame.sprite.Sprite):
 
 
 class Golem(Enemy):
-    image = pygame.image.load("data/idle_golem.png")
 
     def __init__(self, group, x, y, w, h):
         super().__init__(group, x, y, w, h)

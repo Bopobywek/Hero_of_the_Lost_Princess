@@ -12,7 +12,6 @@ from sounds import Sounds
 from button import Button
 from background import Background
 from boss import Troll
-from settings import Settings
 from cursor import Cursor
 
 
@@ -63,7 +62,6 @@ class Game(object):
         self.hero.add(self.all_sprites)
         self.cursor_group = pygame.sprite.Group()
         self.cursor = Cursor(self.cursor_group)
-        self.settings_menu = Settings(self.screen)
         self.main_menu = True
         self.bg = Background(self.background_sprite)
         self.main_img = pygame.image.load("data/main_menu.png")
@@ -107,6 +105,7 @@ class Game(object):
                                    [self.platform_sprites, self.all_sprites, self.hero_sprite,
                                     self.princess_sprite, self.info_sprites, self.boss_sprite, self.enemy_sprites])
                         self.camera.update(self.hero)
+                        self.main_menu = False
                         self.menu_music.stop()
                         self.just_music = choice(self.music)
                         self.just_music.play(-1)
