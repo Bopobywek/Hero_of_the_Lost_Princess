@@ -16,12 +16,16 @@ from settings import Settings
 from cursor import Cursor
 
 
+TITLE = "Hero of the Lost Princess"
+
+
 class Game(object):
 
     def __init__(self, w, h):
         pygame.init()
         self.size = w, h
         self.screen = pygame.display.set_mode(self.size)
+        pygame.display.set_caption(TITLE)
         pygame.display.flip()
         self.hero_is_died = pygame.sprite.Sprite()
         self.hero_is_died.image = pygame.image.load("data/hero_died.png")
@@ -40,7 +44,7 @@ class Game(object):
                       pygame.mixer.Sound("data/background_music_3.ogg")]
         self.menu_music = pygame.mixer.Sound("data/music/main_menu.ogg")
         self.victory_music, self.dead_music = pygame.mixer.Sound("data/Victory.wav"), \
-                                              pygame.mixer.Sound("data/background_music_1.ogg")
+                                              pygame.mixer.Sound("data/dead.wav")
         self.menu_music.play(-1)
         self.hero_sprite = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
@@ -82,20 +86,21 @@ class Game(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                self.buttons.update(event)
-                for sprite in self.buttons:
-                    if sprite.state():
-                        if sprite.button_name == "new_game":
-                            self.main_menu = False
-                            draw_level(self.level_names[0], 46, 46,
-                                       [self.platform_sprites, self.all_sprites, self.hero_sprite,
-                                        self.princess_sprite, self.info_sprites, self.boss_sprite, self.enemy_sprites])
-                            self.camera.update(self.hero)
-                            sprite.pressed = False
-                            self.menu_music.stop()
-                            self.just_music = choice(self.music)
-                            self.just_music.play(-1)
-                            break
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.buttons.update(event)
+                    for sprite in self.buttons:
+                        if sprite.state():
+                            if sprite.button_name == "new_game":
+                                self.main_menu = False
+                                draw_level(self.level_names[0], 46, 46,
+                                           [self.platform_sprites, self.all_sprites, self.hero_sprite,
+                                            self.princess_sprite, self.info_sprites, self.boss_sprite, self.enemy_sprites])
+                                self.camera.update(self.hero)
+                                sprite.pressed = False
+                                self.menu_music.stop()
+                                self.just_music = choice(self.music)
+                                self.just_music.play(-1)
+                                break
                 if event.type == pygame.KEYDOWN:
                     if event.key == 32:
                         draw_level(self.level_names[0], 46, 46,
@@ -106,6 +111,7 @@ class Game(object):
                         self.just_music = choice(self.music)
                         self.just_music.play(-1)
                 if event.type == pygame.MOUSEMOTION:
+                    self.buttons.update(event)
                     self.cursor.rect.x, self.cursor.rect.y = event.pos
         else:
             if not self.hero.dead and not self.hero.win:
@@ -119,6 +125,9 @@ class Game(object):
                     self.level_state = 1
                 if pygame.key.get_pressed()[pygame.K_r]:
                     self.reload_level()
+                    sleep(1)
+                if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                    self.reload()
                     sleep(1)
                 if pygame.key.get_pressed()[pygame.K_f]:
                     self.attack = True
