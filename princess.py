@@ -30,7 +30,7 @@ class Princess(pygame.sprite.Sprite):
                 self.ground = False
 
     def update(self, collide_group):
-        if self.state % 200 == 0:
+        if self.state % 10 == 0:
             self.speed_x = -self.speed_x
             self.state = 1
         if not self.ground:

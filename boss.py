@@ -58,7 +58,6 @@ class Troll(pygame.sprite.Sprite):
         self.health = 500
         self.last_hurt = time()
         self.anim_attack_time = time()
-        self.attack = False
         self.last_attack = time()
         self.left_anim = pyganim.PygAnimation(ANIMATION_LEFT)
         self.left_anim.play()
@@ -122,20 +121,12 @@ class Troll(pygame.sprite.Sprite):
                 else:
                     self.stay_anim.blit(surface, (self.rect.x - 40, self.rect.y - 90))
 
-            self.speed_x = -SPEED
-
             if not self.ground:
                 self.speed_y += GRAVITY
 
             self.rect.y += self.speed_y
             self.collide_y(collide_group)
 
-            if self.state < 250:
-                self.rect.x += self.speed_x
-            else:
-                self.speed_x = 0
-                self.state = 250
-            self.state += 1
             self.attack_player(player_group)
         if self.health < 350:
             self.health += 0.05
@@ -146,5 +137,5 @@ class Troll(pygame.sprite.Sprite):
     def draw_text(self, surface, text):
         font = pygame.font.Font("CloisterBlack.ttf", 19)
         text = font.render(text, 1, pygame.Color("white"))
-        text_x, text_y = 250 + 150, 50
+        text_x, text_y = 150 + 250 - text.get_width() // 2, 50
         surface.blit(text, (text_x, text_y))

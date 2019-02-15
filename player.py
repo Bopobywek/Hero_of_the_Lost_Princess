@@ -1,11 +1,12 @@
 import os
-from time import time
+from time import time, sleep
 
 import pygame
 import pyganim
 
 from platform import *
 from boss import Troll
+from enemy import Golem
 
 GRAVITY = 0.3
 SPEED = 10
@@ -74,10 +75,11 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.last_turn = None
         self.attack = False
+        self.win = False
 
     def damage(self, hp):
         if self.time_hurt is not None:
-            if round(time()) - round(self.time_hurt) > HURT_TIMEOUT:
+            if time() - self.time_hurt > 0.25:
                 self.health -= hp
                 self.time_hurt = time()
         else:
@@ -92,9 +94,27 @@ class Hero(pygame.sprite.Sprite):
 
         self.rect.width -= 20
 
+    def collide_enemy(self, group):
+        self.rect.width += 20
+        for sprite in group:
+            if pygame.sprite.collide_rect(sprite, self) and isinstance(sprite, Golem):
+                if self.attack:
+                    sprite.damage()
+
+        self.rect.width -= 20
+
+    def collide_princess(self, group):
+        self.rect.width += 20
+        for sprite in group:
+            if pygame.sprite.collide_rect(sprite, self) and isinstance(sprite, Princess):
+                self.win = True
+
+        self.rect.width -= 20
+
     def health_check(self):
         if self.health <= 0:
             self.dead = True
+            sleep(2)
 
     def collision_y(self, sprites_group):
         for sprite in sprites_group:
@@ -109,7 +129,8 @@ class Hero(pygame.sprite.Sprite):
 
     def collision_x(self, sprites_group):
         for sprite in sprites_group:
-            if pygame.sprite.collide_rect(sprite, self) and not isinstance(sprite, Sign):
+            if pygame.sprite.collide_rect(sprite, self) and not isinstance(sprite, Sign) \
+                    and not isinstance(sprite, LevelPlatform):
                 if self.speed_x > 0:
                     self.rect.right = sprite.rect.left
                 if self.speed_x < 0:
@@ -186,14 +207,17 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x += self.speed_x
         self.collision_x(group_collide[0])
         self.collide_boss(group_collide[1])
+        self.collide_enemy(group_collide[2])
+        self.collide_princess(group_collide[3])
         self.health_check()
         if self.health < 75:
-            self.health += 0.005
+            self.health += 0.01
 
     def reload(self):
         self.rect.x, self.rect.y = self.start_pos[0], self.start_pos[1]
         self.speed_x, self.speed_y = 0, 0
         self.dead = False
+        self.win = False
         self.health = 100
 
     def reload_level(self, all_sp, name_level):
@@ -201,6 +225,7 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = self.start_pos[0], self.start_pos[1]
         self.speed_x, self.speed_y = 0, 0
         self.dead = False
+        self.win = False
         self.health = 100
 
     def draw_text(self, surface, text):
