@@ -173,6 +173,7 @@ class Game(object):
             self.enemy_sprites.remove(sprite)
         self.hero.reload()
         self.main_menu = True
+        self.dead_m, self.win_m = False, False
         self.just_music.stop()
         self.dead_music.stop()
         self.victory_music.stop()
@@ -186,7 +187,7 @@ class Game(object):
             self.info_sprites.remove(el)
             self.all_sprites.remove(el)
         for sprite in self.princess_sprite:
-            self.boss_sprite.remove(sprite)
+            self.princess_sprite.remove(sprite)
             self.all_sprites.remove(self)
         for sprite in self.boss_sprite:
             self.boss_sprite.remove(sprite)
