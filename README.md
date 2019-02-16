@@ -1,5 +1,5 @@
 # Hero of the Lost Princess
-![Watch the video](https://youtu.be/BtPhp9pSIuc)
+[![Watch the video](https://img.youtube.com/vi/BtPhp9pSIuc/0.jpg)](https://www.youtube.com/watch?v=BtPhp9pSIuc)
 ___
 ## Introduction
 Hero of the Lost Princess is a game about a strong prince who goes to Troll's lair to save his princess
