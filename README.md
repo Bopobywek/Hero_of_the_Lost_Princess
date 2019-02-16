@@ -1,5 +1,5 @@
 # Hero of the Lost Princess
-![Watch the video](https://raw.github.com/Bopobywek/Hero_of_the_Lost_Princess/master/Hotlp4.mp4)
+![Watch the video](https://youtu.be/BtPhp9pSIuc)
 ___
 ## Introduction
 Hero of the Lost Princess is a game about a strong prince who goes to Troll's lair to save his princess
