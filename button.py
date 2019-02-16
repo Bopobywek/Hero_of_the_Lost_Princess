@@ -3,8 +3,9 @@ import pygame
 
 class Button(pygame.sprite.Sprite):
 
-    def __init__(self, group, image_name, second_img_name, x, y, sound_name):
+    def __init__(self, group, image_name, second_img_name, x, y, sound_name, button_name):
         super().__init__(group)
+        self.button_name = button_name
         self.sound = pygame.mixer.Sound("data/music/{}".format(sound_name))
         self.second_image = pygame.image.load("data/{}".format(second_img_name))
         self.first_image = pygame.image.load("data/{}".format(image_name))

@@ -8,3 +8,6 @@ class Background(pygame.sprite.Sprite):
         super().__init__(group)
         self.image = Background.bg
         self.rect = self.image.get_rect()
+
+    def draw(self, surface, x, y):
+        self.image.blit(surface, (x, y))
