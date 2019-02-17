@@ -14,7 +14,6 @@ from background import Background
 from boss import Troll
 from cursor import Cursor
 
-
 TITLE = "Hero of the Lost Princess"
 
 
@@ -42,8 +41,8 @@ class Game(object):
                       pygame.mixer.Sound("data/background_music_2.ogg"),
                       pygame.mixer.Sound("data/background_music_3.ogg")]
         self.menu_music = pygame.mixer.Sound("data/music/main_menu.ogg")
-        self.victory_music, self.dead_music = pygame.mixer.Sound("data/Victory.wav"), \
-                                              pygame.mixer.Sound("data/dead.wav")
+        self.victory_music = pygame.mixer.Sound("data/Victory.wav")
+        self.dead_music = pygame.mixer.Sound("data/dead.wav")
         self.menu_music.play(-1)
         self.hero_sprite = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
@@ -92,7 +91,8 @@ class Game(object):
                                 self.main_menu = False
                                 draw_level(self.level_names[0], 46, 46,
                                            [self.platform_sprites, self.all_sprites, self.hero_sprite,
-                                            self.princess_sprite, self.info_sprites, self.boss_sprite, self.enemy_sprites])
+                                            self.princess_sprite, self.info_sprites, self.boss_sprite,
+                                            self.enemy_sprites])
                                 self.camera.update(self.hero)
                                 sprite.pressed = False
                                 self.menu_music.stop()
@@ -163,10 +163,10 @@ class Game(object):
             self.all_sprites.remove(el)
             self.info_sprites.remove(el)
         for sprite in self.princess_sprite:
-            self.all_sprites.remove(self)
+            self.all_sprites.remove(sprite)
             self.princess_sprite.remove(sprite)
         for sprite in self.boss_sprite:
-            self.all_sprites.remove(self)
+            self.all_sprites.remove(sprite)
             self.boss_sprite.remove(sprite)
         for sprite in self.enemy_sprites:
             self.all_sprites.remove(sprite)
