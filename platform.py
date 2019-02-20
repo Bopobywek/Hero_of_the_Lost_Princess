@@ -37,6 +37,17 @@ class LeftPlatform(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
 
 
+class Bricks(pygame.sprite.Sprite):
+    image_platform = pygame.image.load("data/brick.png")
+    image_platform = pygame.transform.scale(image_platform, (50, 50))
+
+    def __init__(self, group, x, y):
+        super().__init__(group)
+        self.image = Bricks.image_platform
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+
+
 class Coin(pygame.sprite.Sprite):
     image_platform = pygame.image.load("data/coin/coin_01.png")
     image_platform = pygame.transform.scale(image_platform, (47, 47))
@@ -79,7 +90,7 @@ class Sign(pygame.sprite.Sprite):
 
 
 def draw_level(filename, platfrom_h, platfrom_w, group_of_sprites, group_of_sprites_2, dop1, dop2, pr,
-               coins):
+               coins, bricks):
     fullname = os.path.join('data/levels', "{}.txt".format(filename))
     with open(fullname, mode="r") as level_in:
         level = [i.rstrip() for i in level_in.readlines()]
@@ -98,9 +109,11 @@ def draw_level(filename, platfrom_h, platfrom_w, group_of_sprites, group_of_spri
             elif level[y][x] == "c":
                 Coin(coins, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
             elif level[y][x] == '@':
-                Golem(dop1, platfrom_w * x, platfrom_h * y, 26, 26).add(group_of_sprites_2)
+                Golem(dop1, platfrom_w * x, platfrom_h * y - 2 * platfrom_h, 60, 60).add(group_of_sprites_2)
             elif level[y][x] == 'B':
-                Troll(dop2, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
+                Troll(dop2, platfrom_w * x, platfrom_h * y, bricks).add(group_of_sprites_2)
             elif level[y][x] == 'P':
                 Princess(pr, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
+            elif level[y][x] == '0':
+                Bricks(bricks, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
 
