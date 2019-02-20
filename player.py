@@ -40,7 +40,7 @@ ANIMATION_JUMP_LEFT = [(pygame.transform.flip(pygame.transform.scale(
 
 class Hero(pygame.sprite.Sprite):
 
-    def __init__(self, group, x, y, sounds, sprite_group):
+    def __init__(self, group, x, y, sounds, sprite_group, monsters, boss_group, bricks):
         super().__init__(group)
         self.sounds = sounds
         self.speed_x, self.speed_y = 0, 0
@@ -69,7 +69,10 @@ class Hero(pygame.sprite.Sprite):
         self.attack = False
         self.sprite_group = sprite_group
         self.health = 100
+        self.monsters = monsters
+        self.boss_group = boss_group
         self.coins = 0
+        self.bricks = bricks
 
     def collision_y(self, sprites_group):
         for sprite in sprites_group:
@@ -150,12 +153,15 @@ class Hero(pygame.sprite.Sprite):
         self.draw_hp(surface)
         self.draw_coins(surface)
         self.collect_coins(self.sprite_group)
+        self.kill(self.monsters)
+        self.kill(self.boss_group)
 
         self.rect.y += self.speed_y
         self.collision_y(group)
 
         self.rect.x += self.speed_x
         self.collision_x(group)
+        self.collision_x(self.bricks)
 
     def damage(self, n):
         self.health -= n
@@ -184,8 +190,13 @@ class Hero(pygame.sprite.Sprite):
                 self.coins += 1
                 sprite.kill()
 
+    def kill(self, monsters_group):
+        for sprite in monsters_group:
+            if pygame.sprite.collide_rect(self, sprite) and self.attack:
+                sprite.damage()
+
     def health_f(self):
-        if self.health < 70:
+        if self.health < 50:
             self.health += 0.5
 
     def reload(self):
