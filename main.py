@@ -17,7 +17,7 @@ size = width, height = 800, 640
 screen = pygame.display.set_mode(size)
 pygame.display.flip()
 
-levels = ['1.txt', '2.txt', 'final.txt']
+levels = ['intro.txt', '1.txt', '2.txt', 'final.txt']
 menu_music = pygame.mixer.Sound("data/music/main_menu.ogg").play(-1)
 background_music = ["data/background_music_1.ogg", "data/background_music_2.ogg", "data/background_music_3.ogg"]
 back_m = pygame.mixer.Sound(choice(background_music))
