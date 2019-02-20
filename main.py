@@ -16,6 +16,8 @@ pygame.init()
 size = width, height = 800, 640
 screen = pygame.display.set_mode(size)
 pygame.display.flip()
+
+levels = ['1.txt', '2.txt', 'final.txt']
 menu_music = pygame.mixer.Sound("data/music/main_menu.ogg").play(-1)
 background_music = ["data/background_music_1.ogg", "data/background_music_2.ogg", "data/background_music_3.ogg"]
 back_m = pygame.mixer.Sound(choice(background_music))
@@ -29,10 +31,13 @@ princess = pygame.sprite.Group()
 coins_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 boss_group = pygame.sprite.Group()
+bricks_group = pygame.sprite.Group()
 new_game_btn = Button(buttons, "new_game_btn.png", "new_game_btn_2.png", 300, 127, "bookFlip2.ogg")
 settings = Button(buttons, "settings_btn_2.png", "settings_btn.png", 300, 166, "bookFlip2.ogg")
-draw_level("2", 46, 46, platform_sprites, all_sprites, enemy_group, boss_group, princess, coins_group)
-hero = Hero(hero_sprite, 60, 60, Sounds().return_dict_of_sounds(), coins_group)
+draw_level("final", 46, 46, platform_sprites, all_sprites, enemy_group, boss_group, princess,
+           coins_group, bricks_group)
+hero = Hero(hero_sprite, 60, 60, Sounds().return_dict_of_sounds(), coins_group, enemy_group,
+            boss_group, bricks_group)
 hero.add(all_sprites)
 cursor_group = pygame.sprite.Group()
 cursor = pygame.sprite.Sprite()
@@ -87,6 +92,7 @@ while running:
         hero_sprite.update(platform_sprites, screen, left_state, up_state, attack)
         enemy_group.update(platform_sprites, hero_sprite, screen, attack)
         boss_group.update(platform_sprites, hero_sprite, screen)
+        princess.update(platform_sprites, hero_sprite)
         camera.update(hero)
         for sprite in all_sprites:
             camera.apply(sprite)
