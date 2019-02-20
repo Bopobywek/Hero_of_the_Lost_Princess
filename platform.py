@@ -78,7 +78,8 @@ class Sign(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
 
 
-def draw_level(filename, platfrom_h, platfrom_w, group_of_sprites, group_of_sprites_2, dop1, dop2, pr):
+def draw_level(filename, platfrom_h, platfrom_w, group_of_sprites, group_of_sprites_2, dop1, dop2, pr,
+               coins):
     fullname = os.path.join('data/levels', "{}.txt".format(filename))
     with open(fullname, mode="r") as level_in:
         level = [i.rstrip() for i in level_in.readlines()]
@@ -95,7 +96,7 @@ def draw_level(filename, platfrom_h, platfrom_w, group_of_sprites, group_of_spri
             elif level[y][x] == "d":
                 DestroyPlatform(group_of_sprites, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
             elif level[y][x] == "c":
-                Coin(group_of_sprites, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
+                Coin(coins, platfrom_w * x, platfrom_h * y).add(group_of_sprites_2)
             elif level[y][x] == '@':
                 Golem(dop1, platfrom_w * x, platfrom_h * y, 26, 26).add(group_of_sprites_2)
             elif level[y][x] == 'B':
