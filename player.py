@@ -39,9 +39,8 @@ ANIMATION_JUMP_LEFT = [(pygame.transform.flip(pygame.transform.scale(
 
 
 class Hero(pygame.sprite.Sprite):
-    health = 100
 
-    def __init__(self, group, x, y, sounds):
+    def __init__(self, group, x, y, sounds, sprite_group):
         super().__init__(group)
         self.sounds = sounds
         self.speed_x, self.speed_y = 0, 0
@@ -68,6 +67,9 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x, self.rect.y = x, y
         self.last_turn = None
         self.attack = False
+        self.sprite_group = sprite_group
+        self.health = 100
+        self.coins = 0
 
     def collision_y(self, sprites_group):
         for sprite in sprites_group:
@@ -140,10 +142,14 @@ class Hero(pygame.sprite.Sprite):
             else:
                 self.jump_anim.blit(surface, (self.rect.x, self.rect.y))
 
-        if Hero.health <= 0:
-            self.kill()
+        if self.health <= 0:
+            self.reload()
 
-        self.health(Hero.health)
+        self.health_f()
+
+        self.draw_hp(surface)
+        self.draw_coins(surface)
+        self.collect_coins(self.sprite_group)
 
         self.rect.y += self.speed_y
         self.collision_y(group)
@@ -152,11 +158,35 @@ class Hero(pygame.sprite.Sprite):
         self.collision_x(group)
 
     def damage(self, n):
-        Hero.health -= n
+        self.health -= n
 
-    def health(self, health):
-        if health <= 100:
-            health += 0.5
+    def draw_coins(self, surface):
+        self.draw_text(surface, "{}".format(self.coins), self.rect.x + 800//2 - 40,
+                       self.rect.y - 640//2 + 80, 'yellow')
+
+    def draw_hp(self, surface):
+        pygame.draw.rect(surface, pygame.Color("red"), (self.rect.x,
+                                                        self.rect.y - 20,
+                                                        self.rect.width * (self.health / 100),
+                                                        20))
+        self.draw_text(surface, "{}%".format(round(self.health)),
+                       self.rect.x, self.rect.y - 20, 'white')
+
+    def draw_text(self, surface, text, x, y, color):
+        font = pygame.font.Font("14451.ttf", 19)
+        text = font.render(text, 1, pygame.Color(color))
+        text_x, text_y = x + self.rect.width // 2 - text.get_width() // 2, y
+        surface.blit(text, (text_x, text_y))
+
+    def collect_coins(self, sprite_group):
+        for sprite in sprite_group:
+            if pygame.sprite.collide_rect(self, sprite):
+                self.coins += 1
+                sprite.kill()
+
+    def health_f(self):
+        if self.health < 70:
+            self.health += 0.5
 
     def reload(self):
         self.rect.x, self.rect.y = self.start_pos[0], self.start_pos[1]
