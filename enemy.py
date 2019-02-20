@@ -42,14 +42,7 @@ class Enemy(pygame.sprite.Sprite):
         for sprite in group:
             if pygame.sprite.collide_rect(sprite, self):
                 if round(time()) - round(self.last_attack) >= self.time_attack:
-                    if sprite.health <= 15:
-                        sprite.damage(sprite.health)
-                    elif sprite.health <= 50 and self.health <= 150:
-                        sprite.damage(sprite.health - 1)
-                    elif self.health <= 150:
-                        sprite.damage(35)
-                    else:
-                        sprite.damage(5)
+                    sprite.damage(25)
                     self.last_attack = time()
                     self.time_attack = choice(ATTACK_TIMES)
                     self.attack = True
@@ -129,4 +122,3 @@ class Golem(Enemy):
 
         if self.health < 100:
             self.health += 0.05
-
