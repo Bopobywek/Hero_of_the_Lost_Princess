@@ -41,7 +41,7 @@ SPEED = 5
 
 class Troll(pygame.sprite.Sprite):
 
-    def __init__(self, group, x, y):
+    def __init__(self, group, x, y, bricks):
         super().__init__(group)
         self.attack = False
         self.rect = pygame.Rect(x, y, 100, 200)
@@ -65,6 +65,7 @@ class Troll(pygame.sprite.Sprite):
         self.jump.play()
         self.ground = False
         self.state = 1
+        self.bricks = bricks
 
     def attack_player(self, group):
         for sprite in group:
@@ -107,7 +108,7 @@ class Troll(pygame.sprite.Sprite):
         if self.rect.colliderect((0, 0, 900, 640)) == 1 and self.alive():
             self.draw_hp(surface, self.health)
             if self.health <= 0:
-                self.kill()
+                self.reload(self.bricks)
             if self.attack and time() - self.anim_attack_time <= 2:
                 self.jump.blit(surface, (self.rect.x - 80, self.rect.y - 260))
             else:
@@ -131,8 +132,10 @@ class Troll(pygame.sprite.Sprite):
         if self.health < 350:
             self.health += 0.05
 
-    def reload(self):
+    def reload(self, bricks):
         self.kill()
+        for sprite in bricks:
+            sprite.kill()
 
     def draw_text(self, surface, text):
         font = pygame.font.Font("CloisterBlack.ttf", 19)
